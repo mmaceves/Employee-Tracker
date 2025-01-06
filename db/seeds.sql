@@ -22,6 +22,6 @@ VALUES  ('Bob', 'Mack', 1, NULL),
         ('Justin', 'Robinson', 4, Null),
         ('Tony', 'Robles', 5, 4),
         ('Josh', 'Wilson', 6, 4),
-        ('Megan', 'Flores', 9, NULL),
-        ('Steve', 'Hues', 10, 7),
-        ('Daniel', 'Gonzales', 11, 7);
+        ('Megan', 'Flores', 7, NULL),
+        ('Steve', 'Hues', 8, 7),
+        ('Daniel', 'Gonzales', 9, 7);
