@@ -108,6 +108,7 @@ async function AddDepartment() {
 };
 
 async function AddEmployee() {
+    const roleChoices = await pool.query('SELECT id, title FROM role;');
     const answers = await
     inquirer
         .prompt ([
@@ -125,17 +126,7 @@ async function AddEmployee() {
             type: 'list',
             message: 'What is the employee\'s role?',
             name: 'role_id',
-            choices: [
-                { name: 'Coordinator', value: 1 },
-                { name: 'Payroll', value: 2 },
-                { name: 'Recruiter', value: 3 },
-                { name: 'Service Manager', value: 4 },
-                { name: 'Shop Foreman', value: 5 },
-                { name: 'Service Advisor', value: 6 },
-                { name: 'Parts Manager', value: 7 },
-                { name: 'Parts Counter Person', value: 8 },
-                { name: 'Parts Specialist', value: 9 }
-            ]
+            choices: roleChoices.rows.map((role) => ({ name: role.title, value: role.id }))
         },
         {
             type: 'list',
@@ -160,6 +151,7 @@ async function AddEmployee() {
     };
 
 async function AddRole() {
+    const departmentChoices = await pool.query('SELECT id, name FROM department;');
     const answers = await
     inquirer
         .prompt ([
@@ -177,12 +169,7 @@ async function AddRole() {
             type: 'list',
             message: 'Which department does this role belong to?',
             name: 'department_id',
-            choices: [
-                
-                { name: 'HR', value: 1 },
-                { name: 'Service', value: 2 },
-                { name: 'Parts', value: 3 }
-            ]
+            choices: departmentChoices.rows.map((department) => ({ name: department.name, value: department.id }))
         }
     ])
         try {
@@ -196,6 +183,8 @@ async function AddRole() {
         };
 
 async function UpdateRole() {
+    const roleChoices = await pool.query('SELECT id, title FROM role;');
+    const nameChoices = await pool.query('SELECT id, first_name, last_name FROM employee;');
     const answers = await
     inquirer
         .prompt ([
@@ -203,33 +192,13 @@ async function UpdateRole() {
             type: 'list',
             message: 'Which employee\'s role would you like to update?',
             name: 'employee_id',
-            choices: [
-                {name: 'Bob Mack', value: 1}, 
-                {name: 'Jordan Jones', value: 2}, 
-                {name: 'Stacey Johnson', value: 3},
-                {name: 'Justin Robinson', value: 4}, 
-                {name: 'Tony Robles', value: 5}, 
-                {name: 'Josh Wilson', value: 6}, 
-                {name: 'Megan Flores', value: 7}, 
-                {name: 'Steve Hues', value: 8}, 
-                {name: 'Daniel Gonzales', value: 9},
-            ]
+            choices: nameChoices.rows.map((employee) => ({ name: `${employee.first_name} ${employee.last_name}`, value: employee.id }))
         },
         {
             type: 'list',
             message: 'Which role do you want to assign the selected employee?',
             name: 'role_id',
-            choices: [
-                { name: 'Coordinator', value: 1 },
-                { name: 'Payroll', value: 2 },
-                { name: 'Recruiter', value: 3 },
-                { name: 'Service Manager', value: 4 },
-                { name: 'Shop Foreman', value: 5 },
-                { name: 'Service Advisor', value: 6 },
-                { name: 'Parts Manager', value: 7 },
-                { name: 'Parts Counter Person', value: 8 },
-                { name: 'Parts Specialist', value: 9 }
-            ]
+            choices: roleChoices.rows.map((role) => ({ name: role.title, value: role.id }))
         }
     ])
         try {
@@ -243,6 +212,7 @@ async function UpdateRole() {
     };
 
 async function UpdateManager() {
+    const nameChoices = await pool.query('SELECT id, first_name, last_name FROM employee;');
     const answers = await
     inquirer
         .prompt([
@@ -250,17 +220,7 @@ async function UpdateManager() {
                 type: 'list',
                 message: 'Which employee\'s manager would you like to update?',
                 name: 'employee_id',
-                choices: [
-                    {name: 'Bob Mack', value: 1}, 
-                    {name: 'Jordan Jones', value: 2}, 
-                    {name: 'Stacey Johnson', value: 3},
-                    {name: 'Justin Robinson', value: 4}, 
-                    {name: 'Tony Robles', value: 5}, 
-                    {name: 'Josh Wilson', value: 6}, 
-                    {name: 'Megan Flores', value: 7}, 
-                    {name: 'Steve Hues', value: 8}, 
-                    {name: 'Daniel Gonzales', value: 9},
-                ]
+                choices: nameChoices.rows.map((employee) => ({ name: `${employee.first_name} ${employee.last_name}`, value: employee.id }))
             },
             {
                 type: 'list',
