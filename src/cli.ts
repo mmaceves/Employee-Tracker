@@ -1,50 +1,69 @@
 import inquirer from 'inquirer';
-import fs from 'fs';
-import {QueryResult} from 'pg';
-import {pool, connectToDb} from './connections.js';
+import { QueryResult } from 'pg';
+import { pool } from './connections.js';
 
 
 function menu() {
-inquirer
-    .prompt ([
-        {
-            type: 'list',
-            message: 'Select an option.',
-            name: 'choices',
-            choices: [
-                    'View all departments', 
-                    'View all roles', 
-                    'View all employees', 
-                    'Add a department', 
-                    'Add an employee', 
-                    'Update an employee role',
+    inquirer
+        .prompt([
+            {
+                type: 'list',
+                message: 'Select an option.',
+                name: 'choices',
+                choices: [
+                    'View All Departments',
+                    'View All Roles',
+                    'View All Employees',
+                    'Add Department',
+                    'Add Employee',
+                    'Add Role',
+                    'Update Employee Role',
+                    'Update Employee Manager',
+                    'Delete Department',
+                    'Delete Employee',
+                    'Delete Role',
                     'Exit'
-                    ],
-        }
-    ])
-    .then((answers) => {
-        if (answers.choices === 'View all departments') {
-            ViewDepartments();
-        }
-        if (answers.choices === 'View all roles') {
-            ViewRole();
-        }
-        if (answers.choices === 'View all employees') {
-            ViewEmployee();
-        }
-        if (answers.choices === 'Add a department') {
-            AddDepartment();
-        }
-        if (answers.choices === 'Add an employee') {
-            AddEmployee();
-        }
-        if (answers.choices === 'Update an employee role') {
-            UpdateRole();
-        }
-        if (answers.choices === 'Exit') {
-            pool.end();
-        }
-    });
+                ],
+            }
+        ])
+        .then((answers) => {
+            if (answers.choices === 'View All Departments') {
+                ViewDepartments();
+            }
+            if (answers.choices === 'View All Roles') {
+                ViewRole();
+            }
+            if (answers.choices === 'View All Employees') {
+                ViewEmployee();
+            }
+            if (answers.choices === 'Add Department') {
+                AddDepartment();
+            }
+            if (answers.choices === 'Add Employee') {
+                AddEmployee();
+            }
+            if (answers.choices === 'Add Role') {
+                AddRole();
+            }
+            if (answers.choices === 'Update Employee Role') {
+                UpdateRole();
+            }
+            if (answers.choices === 'Update Employee Manager') {
+                UpdateManager();
+            }
+            if (answers.choices === 'Delete Department') {
+                deleteDepartment();
+            }
+            if (answers.choices === 'Delete Employee') {
+                deleteEmployee();
+            }
+            if (answers.choices === 'Delete Role') {
+                deleteRole();
+            }
+            if (answers.choices === 'Exit') {
+                pool.end();
+            }
+        });
 };
 
 
@@ -53,8 +72,8 @@ function ViewDepartments() {
         if (error) {
             throw error;
         } else {
-        console.table(results.rows);
-        menu();
+            console.table(results.rows);
+            menu();
     }})
 };
 
@@ -81,87 +100,286 @@ function ViewEmployee() {
     }})
 };
 
-function AddDepartment() {
-    inquirer
-        .prompt ([
+async function AddDepartment() {
+    const answers = await inquirer.prompt([
         {
             type: 'input',
             message: 'Enter the name of the department.',
             name: 'department',
         }
-    ])
-        .then((answers) => {
-        pool.query('INSERT INTO department (name) VALUES ($1)', [answers.department], (error: Error, results: QueryResult) => {
-            if (error) {
-                throw error;
-            } else {
-                console.log('Department added.')
-                menu();
-            }
-        })
-    })
+    ]);
+
+    try {
+        await pool.query('INSERT INTO department (name) VALUES ($1)', [answers.department]);
+        console.log(`Added ${answers.department} to the database.`);
+    } catch (error) {
+        throw error;
+    } finally {
+        menu();
+    }
 };
 
-function AddEmployee() {
+async function AddEmployee() {
+    const answers = await
     inquirer
         .prompt ([
         {
             type: 'input',
-            message: 'Enter the first name of the employee.',
+            message: 'What is the employee\'s first name?',
             name: 'first_name',
         },
         {
             type: 'input',
-            message: 'Enter the last name of the employee.',
+            message: 'What is the employee\'s last name?',
             name: 'last_name',
         },
         {
-            type: 'input',
-            message: 'Enter the role ID of the employee.',
+            type: 'list',
+            message: 'What is the employee\'s role?',
             name: 'role_id',
+            choices: [
+                { name: 'Coordinator', value: 1 },
+                { name: 'Payroll', value: 2 },
+                { name: 'Recruiter', value: 3 },
+                { name: 'Service Manager', value: 4 },
+                { name: 'Shop Foreman', value: 5 },
+                { name: 'Service Advisor', value: 6 },
+                { name: 'Parts Manager', value: 7 },
+                { name: 'Parts Counter Person', value: 8 },
+                { name: 'Parts Specialist', value: 9 }
+            ]
         },
         {
-            type: 'input',
-            message: 'Enter the manager ID of the employee.',
+            type: 'list',
+            message: 'Who is the employee\'s manager?',
             name: 'manager_id',
+            choices: [
+                { name: 'None', value: null },
+                { name: 'Bob Mack', value: 1 },
+                { name: 'Justin Robinson', value: 2 },
+                { name: 'Megan Flores', value: 3 }
+            ]
         }
     ])
-        .then((answers) => {
-        pool.query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ($1, $2, $3, $4)', [answers.first_name, answers.last_name, answers.role_id, answers.manager_id], (error: Error, results: QueryResult) => {
-            if (error) {
-                throw error;
-            } else {
-                console.log('Employee added.')
-                menu();
-            }
-        })
-    })
-};
+        try {
+            await pool.query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ($1, $2, $3, $4)', [answers.first_name, answers.last_name, answers.role_id, answers.manager_id]);
+                 console.log(`Added ${answers.first_name} ${answers.last_name} to the database.`);
+        } catch (error) {
+            throw error;
+        } finally {
+            menu();
+        }
+    };
 
-function UpdateRole() {
+async function AddRole() {
+    const answers = await
     inquirer
         .prompt ([
         {
             type: 'input',
-            message: 'Enter the employee ID.',
-            name: 'employee_id',
+            message: 'What is the name of the role?',
+            name: 'title',
         },
         {
             type: 'input',
-            message: 'Enter the new role ID.',
-            name: 'role_id',
+            message: 'What is the salary for this role?',
+            name: 'salary',
+        },
+        {
+            type: 'list',
+            message: 'Which department does this role belong to?',
+            name: 'department_id',
+            choices: [
+                { name: 'HR', value: 1 },
+                { name: 'Service', value: 2 },
+                { name: 'Parts', value: 3 }
+            ]
         }
     ])
-        .then((answers) => {
-        pool.query('UPDATE employee SET role_id = $2 WHERE id = $1', [answers.employee_id, answers.role_id], (error: Error, results: QueryResult) => {
-            if (error) {
-                throw error;
-            } else {
-                console.log('Employee role updated.')
+        try {
+        await pool.query('INSERT INTO role (title, salary, department_id) VALUES ($1, $2, $3)', [answers.title, answers.salary, answers.department_id]);
+                console.log(`Added ${answers.title} to the database.`);
+        } catch (error) {
+            throw error;
+        } finally {
                 menu();
             }
-        })
-    })
+        };
+
+async function UpdateRole() {
+    const answers = await
+    inquirer
+        .prompt ([
+        {
+            type: 'list',
+            message: 'Which employee\'s role would you like to update?',
+            name: 'employee_id',
+            choices: [
+                {name: 'Bob Mack', value: 1}, 
+                {name: 'Jordan Jones', value: 2}, 
+                {name: 'Stacey Johnson', value: 3},
+                {name: 'Justin Robinson', value: 4}, 
+                {name: 'Tony Robles', value: 5}, 
+                {name: 'Josh Wilson', value: 6}, 
+                {name: 'Megan Flores', value: 7}, 
+                {name: 'Steve Hues', value: 8}, 
+                {name: 'Daniel Gonzales', value: 9},
+            ]
+        },
+        {
+            type: 'list',
+            message: 'Which role do you want to assign the selected employee?',
+            name: 'role_id',
+            choices: [
+                { name: 'Coordinator', value: 1 },
+                { name: 'Payroll', value: 2 },
+                { name: 'Recruiter', value: 3 },
+                { name: 'Service Manager', value: 4 },
+                { name: 'Shop Foreman', value: 5 },
+                { name: 'Service Advisor', value: 6 },
+                { name: 'Parts Manager', value: 7 },
+                { name: 'Parts Counter Person', value: 8 },
+                { name: 'Parts Specialist', value: 9 }
+            ]
+        }
+    ])
+        try {
+        await pool.query('UPDATE employee SET role_id = $2 WHERE id = $1', [answers.employee_id, answers.role_id]);
+                console.log(`Updated employee's role.`);
+        } catch (error) {
+            throw error;
+        } finally {
+                menu();
+        }
+    };
+
+async function UpdateManager() {
+    const answers = await
+    inquirer
+        .prompt([
+            {
+                type: 'list',
+                message: 'Which employee\'s manager would you like to update?',
+                name: 'employee_id',
+                choices: [
+                    {name: 'Bob Mack', value: 1}, 
+                    {name: 'Jordan Jones', value: 2}, 
+                    {name: 'Stacey Johnson', value: 3},
+                    {name: 'Justin Robinson', value: 4}, 
+                    {name: 'Tony Robles', value: 5}, 
+                    {name: 'Josh Wilson', value: 6}, 
+                    {name: 'Megan Flores', value: 7}, 
+                    {name: 'Steve Hues', value: 8}, 
+                    {name: 'Daniel Gonzales', value: 9},
+                ]
+            },
+            {
+                type: 'list',
+                message: 'Which manager do you want to assign the selected employee?',
+                name: 'manager_id',
+                choices: [
+                    { name: 'None', value: null },
+                    { name: 'Bob Mack', value: 1 },
+                    { name: 'Justin Robinson', value: 2 },
+                    { name: 'Megan Flores', value: 3 }
+                ]
+            }
+        ])
+        try {
+        await pool.query('UPDATE employee SET manager_id = $2 WHERE id = $1', [answers.employee_id, answers.manager_id]);
+                console.log(`Updated employee's manager.`);
+        } catch (error) {
+            throw error;
+        } finally {
+                menu();
+        }
+};
+
+async function deleteDepartment() {
+    const answers = await
+    inquirer
+        .prompt([
+            {
+                type: 'list',
+                message: 'Select a department to delete.',
+                name: 'department',
+                choices: [
+                    { name: 'HR', value: 1 },
+                    { name: 'Service', value: 2 },
+                    { name: 'Parts', value: 3 }
+                ]
+            }
+        ])
+        try {
+            await pool.query('DELETE FROM department WHERE id = $1', [answers.department]);
+                    console.log(`Department deleted.`);
+            } catch (error) {
+                throw error;
+            } finally {
+                    menu();
+            }
+};
+
+async function deleteEmployee() {
+    const answers = await
+    inquirer
+        .prompt([
+            {
+                type: 'list',
+                message: 'Select an employee to delete.',
+                name: 'employee',
+                choices: [
+                    { name: 'Bob Mack', value: 1 },
+                    { name: 'Jordan Jones', value: 2 },
+                    { name: 'Stacey Johnson', value: 3 },
+                    { name: 'Justin Robinson', value: 4 },
+                    { name: 'Tony Robles', value: 5 },
+                    { name: 'Josh Wilson', value: 6 },
+                    { name: 'Megan Flores', value: 7 },
+                    { name: 'Steve Hues', value: 8 },
+                    { name: 'Daniel Gonzales', value: 9 }
+                ]
+            }
+        ])
+        try {
+            await pool.query('DELETE FROM employee WHERE id = $1', [answers.employee]);
+            console.log('Employee deleted.');
+            } catch (error) {
+                throw error;
+            } finally {
+                    menu();
+            }
+};
+
+async function deleteRole() {
+    const answers = await
+    inquirer
+        .prompt([
+            {
+                type: 'list',
+                message: 'Select a role to delete.',
+                name: 'role',
+                choices: [
+                    { name: 'Coordinator', value: 1 },
+                    { name: 'Payroll', value: 2 },
+                    { name: 'Recruiter', value: 3 },
+                    { name: 'Service Manager', value: 4 },
+                    { name: 'Shop Foreman', value: 5 },
+                    { name: 'Service Advisor', value: 6 },
+                    { name: 'Parts Manager', value: 7 },
+                    { name: 'Parts Counter Person', value: 8 },
+                    { name: 'Parts Specialist', value: 9 }
+                ]
+            }
+        ])
+        try {
+            await pool.query('DELETE FROM role WHERE id = $1', [answers.role]);
+                    console.log('Role deleted.');
+            } catch (error) {
+                throw error;
+            } finally {
+                    menu();
+            }
 };
 
 menu();
