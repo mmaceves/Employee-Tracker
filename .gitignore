@@ -1,0 +1,17 @@
+# OS generated files
+Thumbs.db
+ehthumbs.db
+
+# IDE/editor files
+.vscode/
+
+# Dependency directories
+node_modules/
+
+# NPM debug files
+npm-debug.log
+yarn-error.log
+
+# Environment variables
+.env
+
