@@ -19,9 +19,6 @@ function menu() {
                     'Add Role',
                     'Update Employee Role',
                     'Update Employee Manager',
-                    'Delete Department',
-                    'Delete Employee',
-                    'Delete Role',
                     'Exit'
                 ],
             }
@@ -50,15 +47,6 @@ function menu() {
             }
             if (answers.choices === 'Update Employee Manager') {
                 UpdateManager();
-            }
-            if (answers.choices === 'Delete Department') {
-                deleteDepartment();
-            }
-            if (answers.choices === 'Delete Employee') {
-                deleteEmployee();
-            }
-            if (answers.choices === 'Delete Role') {
-                deleteRole();
             }
             if (answers.choices === 'Exit') {
                 pool.end();
@@ -190,6 +178,7 @@ async function AddRole() {
             message: 'Which department does this role belong to?',
             name: 'department_id',
             choices: [
+                
                 { name: 'HR', value: 1 },
                 { name: 'Service', value: 2 },
                 { name: 'Parts', value: 3 }
@@ -294,92 +283,4 @@ async function UpdateManager() {
                 menu();
         }
 };
-
-async function deleteDepartment() {
-    const answers = await
-    inquirer
-        .prompt([
-            {
-                type: 'list',
-                message: 'Select a department to delete.',
-                name: 'department',
-                choices: [
-                    { name: 'HR', value: 1 },
-                    { name: 'Service', value: 2 },
-                    { name: 'Parts', value: 3 }
-                ]
-            }
-        ])
-        try {
-            await pool.query('DELETE FROM department WHERE id = $1', [answers.department]);
-                    console.log(`Department deleted.`);
-            } catch (error) {
-                throw error;
-            } finally {
-                    menu();
-            }
-};
-
-async function deleteEmployee() {
-    const answers = await
-    inquirer
-        .prompt([
-            {
-                type: 'list',
-                message: 'Select an employee to delete.',
-                name: 'employee',
-                choices: [
-                    { name: 'Bob Mack', value: 1 },
-                    { name: 'Jordan Jones', value: 2 },
-                    { name: 'Stacey Johnson', value: 3 },
-                    { name: 'Justin Robinson', value: 4 },
-                    { name: 'Tony Robles', value: 5 },
-                    { name: 'Josh Wilson', value: 6 },
-                    { name: 'Megan Flores', value: 7 },
-                    { name: 'Steve Hues', value: 8 },
-                    { name: 'Daniel Gonzales', value: 9 }
-                ]
-            }
-        ])
-        try {
-            await pool.query('DELETE FROM employee WHERE id = $1', [answers.employee]);
-            console.log('Employee deleted.');
-            } catch (error) {
-                throw error;
-            } finally {
-                    menu();
-            }
-};
-
-async function deleteRole() {
-    const answers = await
-    inquirer
-        .prompt([
-            {
-                type: 'list',
-                message: 'Select a role to delete.',
-                name: 'role',
-                choices: [
-                    { name: 'Coordinator', value: 1 },
-                    { name: 'Payroll', value: 2 },
-                    { name: 'Recruiter', value: 3 },
-                    { name: 'Service Manager', value: 4 },
-                    { name: 'Shop Foreman', value: 5 },
-                    { name: 'Service Advisor', value: 6 },
-                    { name: 'Parts Manager', value: 7 },
-                    { name: 'Parts Counter Person', value: 8 },
-                    { name: 'Parts Specialist', value: 9 }
-                ]
-            }
-        ])
-        try {
-            await pool.query('DELETE FROM role WHERE id = $1', [answers.role]);
-                    console.log('Role deleted.');
-            } catch (error) {
-                throw error;
-            } finally {
-                    menu();
-            }
-};
-
 menu();
